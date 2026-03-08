@@ -20,7 +20,7 @@ const Receipt = ({ party, onReset }: ReceiptProps) => {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => onReset(), 5000);
+    const timer = setTimeout(() => onReset(), 3000);
     return () => clearTimeout(timer);
   }, [onReset]);
   const hash = useState(() => generateHash())[0];
