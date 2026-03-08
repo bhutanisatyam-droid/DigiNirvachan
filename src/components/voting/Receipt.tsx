@@ -16,7 +16,13 @@ const generateHash = () => {
   return hash;
 };
 
-const Receipt = ({ party }: ReceiptProps) => {
+const Receipt = ({ party, onReset }: ReceiptProps) => {
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => onReset(), 5000);
+    return () => clearTimeout(timer);
+  }, [onReset]);
   const [copied, setCopied] = useState(false);
   const hash = useState(() => generateHash())[0];
   const timestamp = new Date().toISOString();
