@@ -73,7 +73,16 @@ const Index = () => {
           {step === 2 && (
             <Ballot key="ballot" onComplete={handleBallotComplete} />
           )}
-          {step === 3 && <Receipt key="receipt" party={votedParty} />}
+          {step === 3 && (
+            <Receipt
+              key="receipt"
+              party={votedParty}
+              onReset={() => {
+                setStep(0);
+                setVotedParty("");
+              }}
+            />
+          )}
         </AnimatePresence>
       </main>
 
