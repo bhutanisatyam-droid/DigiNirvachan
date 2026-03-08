@@ -23,7 +23,6 @@ const Receipt = ({ party, onReset }: ReceiptProps) => {
     const timer = setTimeout(() => onReset(), 5000);
     return () => clearTimeout(timer);
   }, [onReset]);
-  const [copied, setCopied] = useState(false);
   const hash = useState(() => generateHash())[0];
   const timestamp = new Date().toISOString();
   const truncatedHash = `${hash.slice(0, 8)}...${hash.slice(-6)}`;
