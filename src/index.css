@@ -6,72 +6,72 @@
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
-    --foreground: 215 28% 12%;
+    --background: 220 20% 97%;
+    --foreground: 230 25% 12%;
     --card: 0 0% 100%;
-    --card-foreground: 215 28% 12%;
+    --card-foreground: 230 25% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 215 28% 12%;
-    --primary: 207 90% 45%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 210 20% 93%;
-    --secondary-foreground: 215 28% 12%;
-    --muted: 210 15% 92%;
-    --muted-foreground: 215 15% 45%;
-    --accent: 160 84% 39%;
+    --popover-foreground: 230 25% 12%;
+    --primary: 38 92% 50%;
+    --primary-foreground: 230 30% 8%;
+    --secondary: 220 18% 91%;
+    --secondary-foreground: 230 25% 12%;
+    --muted: 220 14% 90%;
+    --muted-foreground: 220 12% 45%;
+    --accent: 152 69% 40%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 215 20% 88%;
-    --input: 215 20% 88%;
-    --ring: 207 90% 45%;
+    --border: 220 18% 86%;
+    --input: 220 18% 86%;
+    --ring: 38 92% 50%;
     --radius: 0.75rem;
-    --glass-bg: 0 0% 100% / 0.7;
-    --glass-border: 215 20% 80% / 0.5;
-    --glow-primary: 207 90% 45%;
-    --glow-accent: 160 84% 39%;
-    --sidebar-background: 210 20% 96%;
-    --sidebar-foreground: 215 28% 12%;
-    --sidebar-primary: 207 90% 45%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 20% 93%;
-    --sidebar-accent-foreground: 215 28% 12%;
-    --sidebar-border: 215 20% 88%;
-    --sidebar-ring: 207 90% 45%;
+    --glass-bg: 0 0% 100% / 0.75;
+    --glass-border: 220 18% 78% / 0.5;
+    --glow-primary: 38 92% 50%;
+    --glow-accent: 152 69% 40%;
+    --sidebar-background: 220 20% 95%;
+    --sidebar-foreground: 230 25% 12%;
+    --sidebar-primary: 38 92% 50%;
+    --sidebar-primary-foreground: 230 30% 8%;
+    --sidebar-accent: 220 18% 91%;
+    --sidebar-accent-foreground: 230 25% 12%;
+    --sidebar-border: 220 18% 86%;
+    --sidebar-ring: 38 92% 50%;
   }
 
   .dark {
-    --background: 215 28% 7%;
-    --foreground: 210 40% 96%;
-    --card: 215 25% 11%;
-    --card-foreground: 210 40% 96%;
-    --popover: 215 25% 11%;
-    --popover-foreground: 210 40% 96%;
-    --primary: 207 90% 54%;
-    --primary-foreground: 215 28% 7%;
-    --secondary: 215 20% 18%;
-    --secondary-foreground: 210 40% 96%;
-    --muted: 215 18% 16%;
-    --muted-foreground: 215 15% 55%;
-    --accent: 160 84% 45%;
-    --accent-foreground: 215 28% 7%;
+    --background: 230 30% 6%;
+    --foreground: 40 30% 95%;
+    --card: 230 25% 10%;
+    --card-foreground: 40 30% 95%;
+    --popover: 230 25% 10%;
+    --popover-foreground: 40 30% 95%;
+    --primary: 38 92% 50%;
+    --primary-foreground: 230 30% 6%;
+    --secondary: 230 20% 16%;
+    --secondary-foreground: 40 30% 95%;
+    --muted: 230 18% 14%;
+    --muted-foreground: 230 12% 50%;
+    --accent: 152 69% 45%;
+    --accent-foreground: 230 30% 6%;
     --destructive: 0 72% 51%;
-    --destructive-foreground: 210 40% 96%;
-    --border: 215 20% 20%;
-    --input: 215 20% 20%;
-    --ring: 207 90% 54%;
-    --glass-bg: 215 25% 12% / 0.6;
-    --glass-border: 215 20% 30% / 0.3;
-    --glow-primary: 207 90% 54%;
-    --glow-accent: 160 84% 45%;
-    --sidebar-background: 215 25% 9%;
-    --sidebar-foreground: 210 40% 96%;
-    --sidebar-primary: 207 90% 54%;
-    --sidebar-primary-foreground: 215 28% 7%;
-    --sidebar-accent: 215 20% 18%;
-    --sidebar-accent-foreground: 210 40% 96%;
-    --sidebar-border: 215 20% 20%;
-    --sidebar-ring: 207 90% 54%;
+    --destructive-foreground: 40 30% 95%;
+    --border: 230 20% 18%;
+    --input: 230 20% 18%;
+    --ring: 38 92% 50%;
+    --glass-bg: 230 25% 10% / 0.65;
+    --glass-border: 230 18% 25% / 0.4;
+    --glow-primary: 38 92% 50%;
+    --glow-accent: 152 69% 45%;
+    --sidebar-background: 230 25% 8%;
+    --sidebar-foreground: 40 30% 95%;
+    --sidebar-primary: 38 92% 50%;
+    --sidebar-primary-foreground: 230 30% 6%;
+    --sidebar-accent: 230 20% 16%;
+    --sidebar-accent-foreground: 40 30% 95%;
+    --sidebar-border: 230 20% 18%;
+    --sidebar-ring: 38 92% 50%;
   }
 }
 
@@ -135,10 +135,10 @@
   .holographic {
     background: linear-gradient(
       135deg,
-      hsl(207 90% 54% / 0.1),
-      hsl(260 80% 60% / 0.1),
-      hsl(160 84% 45% / 0.1),
-      hsl(207 90% 54% / 0.1)
+      hsl(38 92% 50% / 0.1),
+      hsl(260 80% 60% / 0.08),
+      hsl(152 69% 45% / 0.1),
+      hsl(38 92% 50% / 0.1)
     );
     background-size: 300% 300%;
     animation: holographic-shift 3s ease infinite;
