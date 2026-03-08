@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
 import { Copy, ShieldCheck } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface ReceiptProps {
   party: string;
+  onReset: () => void;
 }
 
 const generateHash = () => {
