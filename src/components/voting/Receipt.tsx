@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
 import { Copy, ShieldCheck } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface ReceiptProps {
   party: string;
+  onReset: () => void;
 }
 
 const generateHash = () => {
@@ -15,8 +16,13 @@ const generateHash = () => {
   return hash;
 };
 
-const Receipt = ({ party }: ReceiptProps) => {
+const Receipt = ({ party, onReset }: ReceiptProps) => {
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => onReset(), 5000);
+    return () => clearTimeout(timer);
+  }, [onReset]);
   const hash = useState(() => generateHash())[0];
   const timestamp = new Date().toISOString();
   const truncatedHash = `${hash.slice(0, 8)}...${hash.slice(-6)}`;
