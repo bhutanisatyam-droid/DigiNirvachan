@@ -6,27 +6,14 @@ interface VerificationProps {
   onComplete: () => void;
 }
 
-const steps = [
-  "Connecting to Government Ledger...",
-  "Cross-referencing citizen registry...",
-  "Validating biometric hash...",
-  "Confirming eligibility...",
-  "Identity verified",
-];
-
 const Verification = ({ onComplete }: VerificationProps) => {
-  const [currentStep, setCurrentStep] = useState(0);
   const [done, setDone] = useState(false);
 
   useEffect(() => {
-    if (currentStep < steps.length - 1) {
-      const timer = setTimeout(() => setCurrentStep((s) => s + 1), 900);
-      return () => clearTimeout(timer);
-    } else {
-      setTimeout(() => setDone(true), 400);
-      setTimeout(() => onComplete(), 2200);
-    }
-  }, [currentStep, onComplete]);
+    const t1 = setTimeout(() => setDone(true), 2500);
+    const t2 = setTimeout(() => onComplete(), 3800);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [onComplete]);
 
   return (
     <motion.div
@@ -44,7 +31,6 @@ const Verification = ({ onComplete }: VerificationProps) => {
         </p>
       </div>
 
-      {/* Holographic DNA animation */}
       <div className="relative w-40 h-40 flex items-center justify-center">
         {!done ? (
           <>
@@ -78,33 +64,6 @@ const Verification = ({ onComplete }: VerificationProps) => {
             <ShieldCheck className="w-12 h-12 text-accent" />
           </motion.div>
         )}
-      </div>
-
-      {/* Steps log */}
-      <div className="glass-card glow-border p-5 w-full space-y-2 font-mono text-xs">
-        {steps.map((step, i) => (
-          <motion.div
-            key={step}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{
-              opacity: i <= currentStep ? 1 : 0.2,
-              x: i <= currentStep ? 0 : -10,
-            }}
-            transition={{ delay: i <= currentStep ? 0 : 0 }}
-            className={`flex items-center gap-2 ${
-              i < currentStep
-                ? "text-accent"
-                : i === currentStep
-                ? "text-primary"
-                : "text-muted-foreground"
-            }`}
-          >
-            <span>
-              {i < currentStep ? "✓" : i === currentStep ? (done ? "✓" : "›") : "·"}
-            </span>
-            <span>{step}</span>
-          </motion.div>
-        ))}
       </div>
 
       {done && (

@@ -5,27 +5,37 @@ import IdentityGate from "@/components/voting/IdentityGate";
 import Verification from "@/components/voting/Verification";
 import Ballot from "@/components/voting/Ballot";
 import Receipt from "@/components/voting/Receipt";
-import { Shield } from "lucide-react";
+import { Shield, Sun, Moon } from "lucide-react";
 
 const stepLabels = ["Identity", "Verify", "Vote", "Receipt"];
 
 const Index = () => {
   const [step, setStep] = useState(0);
   const [votedParty, setVotedParty] = useState("");
+  const [dark, setDark] = useState(true);
 
   const handleVerificationComplete = useCallback(() => setStep(2), []);
-  const handleBallotComplete = useCallback(
-    (party: string) => {
-      setVotedParty(party);
-      setStep(3);
-    },
-    []
-  );
+  const handleBallotComplete = useCallback((party: string) => {
+    setVotedParty(party);
+    setStep(3);
+  }, []);
+
+  const toggleTheme = () => {
+    setDark(!dark);
+    document.documentElement.classList.toggle("dark", !dark);
+  };
+
+  // Ensure dark class is set on mount
+  if (typeof document !== "undefined") {
+    if (dark && !document.documentElement.classList.contains("dark")) {
+      document.documentElement.classList.add("dark");
+    }
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="p-4 md:p-6 flex items-center justify-center">
+      <header className="p-4 md:p-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
             <Shield className="w-5 h-5 text-primary" />
@@ -34,6 +44,16 @@ const Index = () => {
             tobedecided
           </span>
         </div>
+        <button
+          onClick={toggleTheme}
+          className="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors"
+        >
+          {dark ? (
+            <Sun className="w-4 h-4 text-foreground" />
+          ) : (
+            <Moon className="w-4 h-4 text-foreground" />
+          )}
+        </button>
       </header>
 
       {/* Step indicator */}
