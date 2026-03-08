@@ -14,15 +14,21 @@ const biometricOptions = [
 
 const IdentityGate = ({ onComplete }: IdentityGateProps) => {
   const [scanning, setScanning] = useState<number | null>(null);
-  const [scanned, setScanned] = useState<number | null>(null);
+  const [completed, setCompleted] = useState<Set<number>>(new Set());
 
   const handleScan = (index: number) => {
+    if (scanning !== null || completed.has(index)) return;
     setScanning(index);
     setTimeout(() => {
-      setScanned(index);
+      const next = new Set(completed);
+      next.add(index);
+      setCompleted(next);
       setScanning(null);
-      setTimeout(() => onComplete(), 1200);
-    }, 2000);
+      // All 3 done → proceed
+      if (next.size === 3) {
+        setTimeout(() => onComplete(), 800);
+      }
+    }, 1800);
   };
 
   return (
@@ -37,25 +43,34 @@ const IdentityGate = ({ onComplete }: IdentityGateProps) => {
           Identity Gate
         </h2>
         <p className="text-muted-foreground text-sm">
-          Authenticate with your biometric to proceed
+          Complete all three biometric scans to proceed
         </p>
+      </div>
+
+      {/* Progress */}
+      <div className="flex items-center gap-2 text-xs text-muted-foreground font-display">
+        <span className="text-primary font-bold">{completed.size}</span>
+        <span>/</span>
+        <span>3 verified</span>
       </div>
 
       <div className="grid gap-4 w-full">
         {biometricOptions.map((opt, i) => {
           const isScanning = scanning === i;
-          const isDone = scanned === i;
+          const isDone = completed.has(i);
           return (
             <motion.button
               key={opt.label}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.1 }}
-              onClick={() => !scanning && scanned === null && handleScan(i)}
-              disabled={scanning !== null || scanned !== null}
+              onClick={() => handleScan(i)}
+              disabled={scanning !== null || isDone}
               className={`glass-card glow-border p-5 flex items-center gap-4 text-left transition-all duration-500 ${
                 isDone ? "!border-accent glow-accent" : ""
-              } ${isScanning ? "!border-primary" : ""} disabled:opacity-60`}
+              } ${isScanning ? "!border-primary" : ""} ${
+                !isDone && scanning === null ? "cursor-pointer" : ""
+              } disabled:cursor-default`}
             >
               <div className="relative">
                 <div

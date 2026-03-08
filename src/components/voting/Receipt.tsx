@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Copy, Download, ShieldCheck } from "lucide-react";
+import { Copy, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 
 interface ReceiptProps {
@@ -108,11 +108,6 @@ const Receipt = ({ party }: ReceiptProps) => {
           )}
         </div>
       </div>
-
-      <button className="glass-card glow-border p-3 px-6 font-display font-semibold text-sm text-foreground hover:text-primary transition-colors flex items-center gap-2 w-full justify-center">
-        <Download className="w-4 h-4" />
-        Download Receipt
-      </button>
     </motion.div>
   );
 };
