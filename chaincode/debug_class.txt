@@ -1,0 +1,22 @@
+class SystemContract extends Contract {
+
+    constructor() {
+        super('org.hyperledger.fabric');
+    }
+
+    /**
+	 *
+	 * @param {Object} chaincode
+	 */
+    _setMetadata(metadata) {
+        this.metadata = metadata;
+    }
+
+    /**
+     * Gets meta data associated with this Chaincode deployment
+     */
+    async GetMetadata() {
+        return this.metadata;
+    }
+
+}

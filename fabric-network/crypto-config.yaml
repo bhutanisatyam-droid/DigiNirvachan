@@ -1,0 +1,35 @@
+# ============================================================
+#  crypto-config.yaml — Generates X.509 Crypto Certificates
+# ============================================================
+
+OrdererOrgs:
+  - Name: Orderer
+    Domain: example.com
+    EnableNodeOUs: true
+    Specs:
+      - Hostname: orderer
+
+PeerOrgs:
+  - Name: ECIOrg
+    Domain: eci.example.com
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+    Users:
+      Count: 1
+
+  - Name: SupremeCourtOrg
+    Domain: supremecourt.example.com
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+    Users:
+      Count: 1
+
+  - Name: OppositionOrg
+    Domain: opposition.example.com
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+    Users:
+      Count: 1

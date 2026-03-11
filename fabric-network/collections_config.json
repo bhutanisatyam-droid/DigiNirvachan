@@ -1,0 +1,14 @@
+[
+    {
+        "name": "BiometricDataCollection",
+        "policy": "OR('ECIOrgMSP.peer')",
+        "requiredPeerCount": 1,
+        "maxPeerCount": 3,
+        "blockToLive": 1000000,
+        "memberOnlyRead": true,
+        "memberOnlyWrite": true,
+        "endorsementPolicy": {
+            "signaturePolicy": "OR('ECIOrgMSP.peer')"
+        }
+    }
+]

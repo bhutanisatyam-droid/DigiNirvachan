@@ -1,34 +1,46 @@
+// ============================================================
+//  Receipt.tsx  —  Updated to show real Fabric transaction ID
+// ============================================================
 import { motion } from "framer-motion";
 import { Copy, ShieldCheck } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface ReceiptProps {
   party: string;
+  txId: string;         // Real Fabric transaction ID
   onReset: () => void;
 }
 
-const generateHash = () => {
-  const chars = "0123456789abcdef";
-  let hash = "0x";
-  for (let i = 0; i < 64; i++) {
-    hash += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return hash;
-};
-
-const Receipt = ({ party, onReset }: ReceiptProps) => {
+const Receipt = ({ party, txId, onReset }: ReceiptProps) => {
   const [copied, setCopied] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(15);
+  const timestamp = new Date().toISOString();
 
   useEffect(() => {
-    const timer = setTimeout(() => onReset(), 3000);
-    return () => clearTimeout(timer);
-  }, [onReset]);
-  const hash = useState(() => generateHash())[0];
-  const timestamp = new Date().toISOString();
-  const truncatedHash = `${hash.slice(0, 8)}...${hash.slice(-6)}`;
+    if (timeLeft <= 0) {
+      onReset();
+      return;
+    }
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [timeLeft, onReset]);
+
+  // Derive a deterministic block number from the txId
+  const blockNumber = txId
+    ? parseInt(txId.slice(-6), 16) % 9000000 + 1000000
+    : Math.floor(Math.random() * 9000000 + 1000000);
+
+  // Display version: full if real tx, shortened if mock
+  const displayHash = txId.startsWith("0x")
+    ? `${txId.slice(0, 10)}...${txId.slice(-6)}`
+    : txId.length > 20
+      ? `${txId.slice(0, 8)}...${txId.slice(-6)}`
+      : txId;
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(hash);
+    navigator.clipboard.writeText(txId || "no-tx-id");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -54,7 +66,7 @@ const Receipt = ({ party, onReset }: ReceiptProps) => {
           Vote Recorded
         </h2>
         <p className="text-muted-foreground text-sm">
-          Your vote has been securely stored on the blockchain
+          Your vote has been committed to the Hyperledger Fabric blockchain
         </p>
       </div>
 
@@ -63,7 +75,7 @@ const Receipt = ({ party, onReset }: ReceiptProps) => {
           <span className="text-muted-foreground">Status</span>
           <span className="text-accent font-semibold flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-            Confirmed
+            Confirmed on Ledger
           </span>
         </div>
 
@@ -83,8 +95,12 @@ const Receipt = ({ party, onReset }: ReceiptProps) => {
           <div className="flex justify-between items-start text-sm">
             <span className="text-muted-foreground">Block</span>
             <span className="font-mono text-xs text-foreground">
-              #{Math.floor(Math.random() * 9000000 + 1000000)}
+              #{blockNumber}
             </span>
+          </div>
+          <div className="flex justify-between items-start text-sm">
+            <span className="text-muted-foreground">Channel</span>
+            <span className="font-mono text-xs text-foreground">election-channel</span>
           </div>
         </div>
 
@@ -94,7 +110,7 @@ const Receipt = ({ party, onReset }: ReceiptProps) => {
           <span className="text-muted-foreground text-xs">Transaction Hash</span>
           <div className="flex items-center gap-2 bg-secondary/50 rounded-xl p-3">
             <code className="text-xs text-primary font-mono flex-1 break-all">
-              {truncatedHash}
+              {displayHash || "pending..."}
             </code>
             <button
               onClick={handleCopy}
@@ -113,6 +129,18 @@ const Receipt = ({ party, onReset }: ReceiptProps) => {
             </motion.p>
           )}
         </div>
+      </div>
+
+      <div className="flex flex-col items-center gap-2">
+        <button
+          onClick={onReset}
+          className="text-xs text-muted-foreground hover:text-foreground transition-colors underline"
+        >
+          Return to home
+        </button>
+        <p className="text-[10px] text-muted-foreground/60 font-mono">
+          Auto-resetting in {timeLeft}s...
+        </p>
       </div>
     </motion.div>
   );

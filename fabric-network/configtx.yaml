@@ -1,0 +1,204 @@
+---
+################################################################################
+#   SECTION: Organizations
+################################################################################
+Organizations:
+
+  - &OrdererOrg
+    Name: OrdererOrg
+    ID: OrdererMSP
+    MSPDir: organizations/ordererOrganizations/example.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('OrdererMSP.member')"
+      Writers:
+        Type: Signature
+        Rule: "OR('OrdererMSP.member')"
+      Admins:
+        Type: Signature
+        Rule: "OR('OrdererMSP.admin')"
+    OrdererEndpoints:
+      - orderer.example.com:7050
+
+  - &ECIOrg
+    Name: ECIOrgMSP
+    ID: ECIOrgMSP
+    MSPDir: organizations/peerOrganizations/eci.example.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('ECIOrgMSP.admin', 'ECIOrgMSP.peer', 'ECIOrgMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('ECIOrgMSP.admin', 'ECIOrgMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('ECIOrgMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('ECIOrgMSP.peer')"
+    AnchorPeers:
+      - Host: peer0.eci.example.com
+        Port: 7051
+
+  - &SupremeCourtOrg
+    Name: SupremeCourtOrgMSP
+    ID: SupremeCourtOrgMSP
+    MSPDir: organizations/peerOrganizations/supremecourt.example.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('SupremeCourtOrgMSP.admin', 'SupremeCourtOrgMSP.peer', 'SupremeCourtOrgMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('SupremeCourtOrgMSP.admin', 'SupremeCourtOrgMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('SupremeCourtOrgMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('SupremeCourtOrgMSP.peer')"
+    AnchorPeers:
+      - Host: peer0.supremecourt.example.com
+        Port: 9051
+
+  - &OppositionOrg
+    Name: OppositionOrgMSP
+    ID: OppositionOrgMSP
+    MSPDir: organizations/peerOrganizations/opposition.example.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('OppositionOrgMSP.admin', 'OppositionOrgMSP.peer', 'OppositionOrgMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('OppositionOrgMSP.admin', 'OppositionOrgMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('OppositionOrgMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('OppositionOrgMSP.peer')"
+    AnchorPeers:
+      - Host: peer0.opposition.example.com
+        Port: 11051
+
+################################################################################
+#   SECTION: Capabilities
+################################################################################
+Capabilities:
+  Channel: &ChannelCapabilities
+    V2_0: true
+  Orderer: &OrdererCapabilities
+    V2_0: true
+  Application: &ApplicationCapabilities
+    V2_5: true
+
+################################################################################
+#   SECTION: Application
+################################################################################
+Application: &ApplicationDefaults
+  Organizations:
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    LifecycleEndorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+    Endorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+  Capabilities:
+    <<: *ApplicationCapabilities
+
+################################################################################
+#   SECTION: Orderer
+################################################################################
+Orderer: &OrdererDefaults
+  OrdererType: etcdraft
+  Addresses:
+    - orderer.example.com:7050
+  EtcdRaft:
+    Consenters:
+      - Host: orderer.example.com
+        Port: 7050
+        ClientTLSCert: organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/server.crt
+        ServerTLSCert: organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/server.crt
+  BatchTimeout: 2s
+  BatchSize:
+    MaxMessageCount: 10
+    AbsoluteMaxBytes: 99 MB
+    PreferredMaxBytes: 512 KB
+  Organizations:
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    BlockValidation:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+
+################################################################################
+#   SECTION: Channel
+################################################################################
+Channel: &ChannelDefaults
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+  Capabilities:
+    <<: *ChannelCapabilities
+
+################################################################################
+#   SECTION: Profiles
+################################################################################
+Profiles:
+
+  # Used by osnadmin to bootstrap the orderer (Fabric 2.5+ approach)
+  ElectionGenesis:
+    <<: *ChannelDefaults
+    Orderer:
+      <<: *OrdererDefaults
+      Organizations:
+        - *OrdererOrg
+      Capabilities: *OrdererCapabilities
+    Application:
+      <<: *ApplicationDefaults
+      Organizations:
+        - *ECIOrg
+        - *SupremeCourtOrg
+        - *OppositionOrg
+      Capabilities: *ApplicationCapabilities
+
+
+  # Channel creation profile (used for channel TX)
+  ElectionChannel:
+    Consortium: ElectionConsortium
+    <<: *ChannelDefaults
+    Application:
+      <<: *ApplicationDefaults
+      Organizations:
+        - *ECIOrg
+        - *SupremeCourtOrg
+        - *OppositionOrg
+      Capabilities: *ApplicationCapabilities

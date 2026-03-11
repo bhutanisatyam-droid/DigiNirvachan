@@ -1,0 +1,4 @@
+EVotingContract type: function
+contracts: 1
+contracts[0] type: function
+SUCCESS. Chaincode instantiated.

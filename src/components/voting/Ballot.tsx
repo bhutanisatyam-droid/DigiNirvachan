@@ -1,9 +1,19 @@
+// ============================================================
+//  Ballot.tsx  —  Updated to use Fabric backend vote submission
+// ============================================================
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import { Check, X } from "lucide-react";
+import { Check, X, Loader2 } from "lucide-react";
+import { useFabricVote, simulateBiometricHash } from "@/hooks/useFabricVote";
 
 interface BallotProps {
-  onComplete: (party: string) => void;
+  onComplete: (party: string, txId: string) => void;
+  anonymousToken: string;
+  biometricPayload: {
+    faceHash: string;
+    irisHash: string;
+    fingerprintHash: string;
+  };
 }
 
 const parties = [
@@ -15,19 +25,30 @@ const parties = [
   { id: "green", name: "Green Future Party", color: "#22C55E", abbr: "GFP" },
 ];
 
-const Ballot = ({ onComplete }: BallotProps) => {
+const Ballot = ({ onComplete, anonymousToken, biometricPayload }: BallotProps) => {
   const [selected, setSelected] = useState<string | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
+  const { status, error, receipt, submitVote } = useFabricVote();
+
+  const isSubmitting = status === "submitting" || status === "verifying";
 
   const handleSelect = (id: string) => {
     setSelected(id);
     setShowConfirm(true);
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     const party = parties.find((p) => p.id === selected);
-    if (party) onComplete(party.name);
+    if (!party) return;
+
+    await submitVote(anonymousToken, party.id, biometricPayload);
   };
+
+  // Once confirmed, bubble up with real tx data
+  if (status === "confirmed" && receipt) {
+    const party = parties.find((p) => p.id === selected);
+    onComplete(party?.name ?? selected!, receipt.transactionId);
+  }
 
   const selectedParty = parties.find((p) => p.id === selected);
 
@@ -55,17 +76,12 @@ const Ballot = ({ onComplete }: BallotProps) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.07 }}
             onClick={() => handleSelect(party.id)}
-            className={`party-card flex items-center gap-4 ${
-              selected === party.id ? "selected" : ""
-            }`}
+            disabled={isSubmitting}
+            className={`party-card flex items-center gap-4 ${selected === party.id ? "selected" : ""}`}
           >
             <div
               className="w-12 h-12 rounded-xl flex items-center justify-center font-display font-bold text-sm shrink-0"
-              style={{
-                background: `${party.color}22`,
-                color: party.color,
-                border: `1px solid ${party.color}44`,
-              }}
+              style={{ background: `${party.color}22`, color: party.color, border: `1px solid ${party.color}44` }}
             >
               {party.abbr}
             </div>
@@ -73,11 +89,7 @@ const Ballot = ({ onComplete }: BallotProps) => {
               {party.name}
             </span>
             {selected === party.id && (
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center"
-              >
+              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
                 <Check className="w-4 h-4 text-primary" />
               </motion.div>
             )}
@@ -85,60 +97,59 @@ const Ballot = ({ onComplete }: BallotProps) => {
         ))}
       </div>
 
+      {/* Error banner */}
+      {status === "error" && error && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full glass-card p-4 border border-destructive/40 text-destructive text-sm text-center">
+          {error}
+        </motion.div>
+      )}
+
       {/* Confirm Modal */}
       <AnimatePresence>
         {showConfirm && selectedParty && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            style={{ background: "hsla(215, 28%, 5%, 0.8)" }}
+            style={{ background: "hsla(215, 28%, 5%, 0.85)" }}
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
+              initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
               className="glass-card glow-border p-8 max-w-sm w-full text-center space-y-6"
             >
-              <h3 className="font-display font-bold text-xl text-foreground">
-                Confirm Your Vote
-              </h3>
+              <h3 className="font-display font-bold text-xl text-foreground">Confirm Your Vote</h3>
+
               <div className="space-y-3">
                 <div
                   className="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center font-display font-bold text-lg"
-                  style={{
-                    background: `${selectedParty.color}22`,
-                    color: selectedParty.color,
-                    border: `1px solid ${selectedParty.color}44`,
-                  }}
+                  style={{ background: `${selectedParty.color}22`, color: selectedParty.color, border: `1px solid ${selectedParty.color}44` }}
                 >
                   {selectedParty.abbr}
                 </div>
-                <p className="font-display font-semibold text-lg text-foreground">
-                  {selectedParty.name}
-                </p>
-                <p className="text-muted-foreground text-sm">
-                  This action is final and cannot be undone.
-                </p>
+                <p className="font-display font-semibold text-lg text-foreground">{selectedParty.name}</p>
+                <p className="text-muted-foreground text-sm">This action is final and cannot be undone.</p>
+                {isSubmitting && (
+                  <div className="flex items-center justify-center gap-2 text-primary text-sm">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    {status === "verifying" ? "Verifying identity on blockchain..." : "Committing vote to ledger..."}
+                  </div>
+                )}
               </div>
+
               <div className="flex gap-3">
                 <button
-                  onClick={() => {
-                    setShowConfirm(false);
-                    setSelected(null);
-                  }}
-                  className="flex-1 glass-card p-3 font-display font-semibold text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center gap-2"
+                  onClick={() => { setShowConfirm(false); setSelected(null); }}
+                  disabled={isSubmitting}
+                  className="flex-1 glass-card p-3 font-display font-semibold text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                 >
-                  <X className="w-4 h-4" />
-                  Cancel
+                  <X className="w-4 h-4" /> Cancel
                 </button>
                 <button
                   onClick={handleConfirm}
-                  className="flex-1 rounded-2xl p-3 font-display font-semibold text-sm bg-primary text-primary-foreground hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                  disabled={isSubmitting}
+                  className="flex-1 rounded-2xl p-3 font-display font-semibold text-sm bg-primary text-primary-foreground hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50"
                 >
-                  <Check className="w-4 h-4" />
-                  Confirm
+                  {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                  {isSubmitting ? "Processing..." : "Confirm"}
                 </button>
               </div>
             </motion.div>
